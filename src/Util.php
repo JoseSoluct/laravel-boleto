@@ -510,9 +510,9 @@ final class Util
 
         // Verifica se o tipo é 'x' minúsculo e então retorna a string em minúsculas
         if ($tipo === 'Z') {
-            return strtolower(sprintf("%{$left}{$sFill}{$tamanho}{$type}", mb_substr($valor, 0, $tamanho)));
+            return strtolower(sprintf("%$left$sFill$tamanho$type", mb_substr($valor, 0, $tamanho)));
         } else {
-            return sprintf("%{$left}{$sFill}{$tamanho}{$type}", mb_substr($valor, 0, $tamanho));
+            return sprintf("%$left$sFill$tamanho$type", mb_substr($valor, 0, $tamanho));
         }
     }
 
@@ -839,16 +839,16 @@ final class Util
      * @param int $i
      * @param int $f
      * @param $value
-     *
+     * @param int $tamanhoLinha
      * @return array
      * @throws ValidationException
      */
-    public static function adiciona(&$line, $i, $f, $value)
+    public static function adiciona(&$line, $i, $f, $value, $tamanhoLinha = 400)
     {
         $i--;
 
-        if (($i > 398 || $f > 400) && ($i != 401 && $f != 444)) {
-            throw new ValidationException('$ini ou $fim ultrapassam o limite máximo de 400');
+        if ($f > $tamanhoLinha) {
+            throw new ValidationException('$ini ou $fim ultrapassam o limite máximo de ' . $tamanhoLinha);
         }
 
         if ($f < $i) {
@@ -896,7 +896,7 @@ final class Util
     /**
      * @param $file
      *
-     * @return array|bool
+     * @return array
      */
     public static function file2array($file)
     {
@@ -1070,6 +1070,8 @@ final class Util
             BoletoContract::COD_BANCO_BTG       => 'Banco\\Btg',
             BoletoContract::COD_BANCO_UNICRED   => 'Banco\\Unicred',
             BoletoContract::COD_BANCO_BRADESCO  => 'Banco\\Bradesco',
+            BoletoContract::COD_BANCO_ABC       => 'Banco\\Abc',
+            BoletoContract::COD_BANCO_GRAFENO   => 'Banco\\Grafeno',
             BoletoContract::COD_BANCO_FIBRA     => 'Banco\\Fibra',
             BoletoContract::COD_BANCO_ITAU      => 'Banco\\Itau',
             BoletoContract::COD_BANCO_HSBC      => 'Banco\\Hsbc',
@@ -1080,6 +1082,7 @@ final class Util
             BoletoContract::COD_BANCO_BANCOOB   => 'Banco\\Bancoob',
             BoletoContract::COD_BANCO_CRESOL    => 'Banco\\Cresol',
             BoletoContract::COD_BANCO_AILOS     => 'Banco\\Ailos',
+            BoletoContract::COD_BANCO_DAYCOVAL  => 'Banco\\Daycoval',
         ];
 
         if (array_key_exists($banco, $aBancos)) {
@@ -1098,13 +1101,35 @@ final class Util
      */
     public static function addPessoa(&$property, $obj)
     {
-        if (is_subclass_of($obj, 'Eduardokum\\LaravelBoleto\\Contracts\\Pessoa')) {
+        if (is_subclass_of($obj, "Eduardokum\LaravelBoleto\Contracts\Pessoa")) {
             $property = $obj;
 
             return $obj;
         } elseif (is_array($obj)) {
             $obj = new Pessoa($obj);
             $property = $obj;
+
+            return $obj;
+        }
+        throw new ValidationException('Objeto inválido, somente Pessoa e Array');
+    }
+
+    /**
+     * @param $property
+     * @param $obj
+     *
+     * @return NotaFiscal
+     * @throws ValidationException
+     */
+    public static function addNotaFiscal(&$property, $obj)
+    {
+        if (is_subclass_of($obj, "Eduardokum\LaravelBoleto\Contracts\NotaFiscal")) {
+            $property[] = $obj;
+
+            return $obj;
+        } elseif (is_array($obj)) {
+            $obj = new NotaFiscal($obj);
+            $property[] = $obj;
 
             return $obj;
         }
@@ -1167,12 +1192,10 @@ final class Util
         }
         for ($s = 10, $n = 0, $i = 0; $s >= 2; $n += $c[$i++] * $s--);
         if ($c[9] != ((($n %= 11) < 2) ? 0 : 11 - $n)) {
-
             return false;
         }
         for ($s = 11, $n = 0, $i = 0; $s >= 2; $n += $c[$i++] * $s--);
         if ($c[10] != ((($n %= 11) < 2) ? 0 : 11 - $n)) {
-
             return false;
         }
 
@@ -1192,12 +1215,10 @@ final class Util
         }
         for ($i = 0, $n = 0; $i < 12; $n += $c[$i] * $b[++$i]);
         if ($c[12] != ((($n %= 11) < 2) ? 0 : 11 - $n)) {
-
             return false;
         }
         for ($i = 0, $n = 0; $i <= 12; $n += $c[$i] * $b[$i++]);
         if ($c[13] != ((($n %= 11) < 2) ? 0 : 11 - $n)) {
-
             return false;
         }
 

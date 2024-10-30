@@ -259,11 +259,7 @@ class Bb extends AbstractRemessa implements RemessaContract
     public function addBoleto(BoletoContract $boleto)
     {
         $this->boletos[] = $boleto;
-        if ($chaveNfe = $boleto->getChaveNfe()) {
-            $this->iniciaDetalheExtendido();
-        } else {
-            $this->iniciaDetalhe();
-        }
+        $this->iniciaDetalhe(($chaveNfe = $boleto->getChaveNfe()) ? 44 : 0);
 
         $this->add(1, 1, 7);
         $this->add(2, 3, strlen(Util::onlyNumbers($this->getBeneficiario()->getDocumento())) == 14 ? '02' : '01');
@@ -347,7 +343,7 @@ class Bb extends AbstractRemessa implements RemessaContract
             $this->add(1, 1, 5);
             $this->add(2, 3, 99);
             $this->add(4, 4, 2);
-            $this->add(5, 10, $boleto->getJurosApos() === false ? '000000' : $boleto->getDataVencimento()->copy()->addDays($boleto->getJurosApos())->format('dmy'));
+            $this->add(5, 10, $boleto->getMultaApos() === false ? $boleto->getDataVencimento()->copy()->format('dmy') : $boleto->getDataVencimento()->copy()->addDays($boleto->getMultaApos())->format('dmy'));
             $this->add(11, 22, Util::formatCnab('9', $boleto->getMulta(), 12, 2));
             $this->add(23, 394, '');
             $this->add(395, 400, Util::formatCnab('9', $this->iRegistros + 1, 6));

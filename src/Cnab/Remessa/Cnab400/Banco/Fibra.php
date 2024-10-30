@@ -143,9 +143,9 @@ class Fibra extends AbstractRemessa implements RemessaContract
         $this->add(87, 89, Util::formatCnab('X', '', 3));
         $this->add(90, 90, $boleto->getMulta() > 0 ? '2' : '0');
         $this->add(91, 103, Util::formatCnab('9', $boleto->getMulta(), 13, 2));
-        $this->add(104, 105, $boleto->getMulta() > 0 ? '01' : '00');
+        $this->add(104, 105, $boleto->getMulta() > 0 ? Util::numberFormatGeral($boleto->getMultaApos(), 2) : '00');
         $this->add(106, 107, '');
-        $this->add(108, 108, Util::formatCnab('9', $boleto->getModalidadeCarteira(), 1));
+        $this->add(108, 108, Util::formatCnab('9', $this->getCarteira(), 1));
         $this->add(109, 110, self::OCORRENCIA_REMESSA); // REGISTRO
         if ($boleto->getStatus() == $boleto::STATUS_BAIXA) {
             $this->add(109, 110, self::OCORRENCIA_PEDIDO_BAIXA); // BAIXA
@@ -196,10 +196,10 @@ class Fibra extends AbstractRemessa implements RemessaContract
         $this->add(394, 394, $boleto->getMoeda());
         $this->add(395, 400, Util::formatCnab('9', $this->iRegistros + 1, 6));
 
-        if ($chaveNfe = $boleto->getChaveNfe()) {
+        if (count($boleto->getNotasFiscais()) > 0) {
             $this->iniciaDetalhe();
             $this->add(1, 1, '4');
-            $this->add(38, 81, Util::formatCnab('9', $chaveNfe, 44));
+            $this->add(38, 81, Util::formatCnab('9', $boleto->getNotaFiscal(0)->getChave(), 44));
             $this->add(395, 400, Util::formatCnab('9', $this->iRegistros + 1, 6));
         }
 

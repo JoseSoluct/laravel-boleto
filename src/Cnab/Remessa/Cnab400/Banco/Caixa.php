@@ -153,17 +153,13 @@ class Caixa extends AbstractRemessa implements RemessaContract
     public function addBoleto(BoletoContract $boleto)
     {
         $this->boletos[] = $boleto;
-        if ($chaveNfe = $boleto->getChaveNfe()) {
-            $this->iniciaDetalheExtendido();
-        } else {
-            $this->iniciaDetalhe();
-        }
+        $this->iniciaDetalhe(($chaveNfe = $boleto->getChaveNfe()) ? 44 : 0);
 
         $this->add(1, 1, '1');
         $this->add(2, 3, strlen(Util::onlyNumbers($this->getBeneficiario()->getDocumento())) == 14 ? '02' : '01');
         $this->add(4, 17, Util::formatCnab('9', Util::onlyNumbers($this->getBeneficiario()->getDocumento()), 14));
         if ($this->isLayout007()) {
-            $this->add(18, 20, '');
+            $this->add(18, 20, '000');
             $this->add(21, 27, Util::formatCnab('9', $this->getCodigoCliente(), 7));
         } else {
             $this->add(18, 21, Util::formatCnab('9', $this->getAgencia(), 4));

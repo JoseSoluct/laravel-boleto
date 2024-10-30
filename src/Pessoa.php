@@ -7,10 +7,24 @@ use Eduardokum\LaravelBoleto\Contracts\Pessoa as PessoaContract;
 
 class Pessoa implements PessoaContract
 {
+    const TIPO_PAGADOR = 'pagador';
+    const TIPO_BENEFICIARIO = 'beneficiario';
+    const TIPO_SACADOR = 'sacadorAvalista';
+
+    /**
+     * @var string
+     */
+    protected $tipo;
+
     /**
      * @var string
      */
     protected $nome;
+
+    /**
+     * @var string|null
+     */
+    protected $nomeFantasia = null;
 
     /**
      * @var string
@@ -55,25 +69,27 @@ class Pessoa implements PessoaContract
     /**
      * @param      $nome
      * @param      $documento
-     * @param null $endereco
-     * @param null $bairro
-     * @param null $cep
-     * @param null $cidade
-     * @param null $uf
-     * @param null $email
+     * @param string|null $endereco
+     * @param string|null $bairro
+     * @param string|null $cep
+     * @param string|null $cidade
+     * @param string|null $uf
+     * @param string|null $email
+     * @param string|null $nomeFantasia
      * @return Pessoa
      */
-    public static function create($nome, $documento, $endereco = null, $bairro = null, $cep = null, $cidade = null, $uf = null, $email = null)
+    public static function create($nome, $documento, $endereco = null, $bairro = null, $cep = null, $cidade = null, $uf = null, $email = null, $nomeFantasia = null)
     {
         return new static([
-            'nome'      => $nome,
-            'endereco'  => $endereco,
-            'bairro'    => $bairro,
-            'cep'       => $cep,
-            'uf'        => $uf,
-            'cidade'    => $cidade,
-            'documento' => $documento,
-            'email'     => $email,
+            'nome'         => $nome,
+            'nomeFantasia' => $nomeFantasia,
+            'endereco'     => $endereco,
+            'bairro'       => $bairro,
+            'cep'          => $cep,
+            'uf'           => $uf,
+            'cidade'       => $cidade,
+            'documento'    => $documento,
+            'email'        => $email,
         ]);
     }
 
@@ -85,6 +101,39 @@ class Pessoa implements PessoaContract
     public function __construct($params = [])
     {
         Util::fillClass($this, $params);
+    }
+
+    /**
+     * Define o tipo
+     *
+     * @param $tipo
+     * @param bool $force
+     * @return Pessoa
+     * @throws ValidationException
+     */
+    public function setTipo($tipo, $force = false)
+    {
+        if (! in_array($tipo, [self::TIPO_PAGADOR, self::TIPO_BENEFICIARIO, self::TIPO_SACADOR])) {
+            throw new ValidationException("Tipo de pessoa inválido [$tipo]");
+        }
+
+        if ($this->getTipo() && ! $force) {
+            return $this;
+        }
+
+        $this->tipo = $tipo;
+
+        return $this;
+    }
+
+    /**
+     * Retorna o bairro
+     *
+     * @return string
+     */
+    public function getTipo()
+    {
+        return $this->tipo;
     }
 
     /**
@@ -240,6 +289,30 @@ class Pessoa implements PessoaContract
     public function getNome()
     {
         return $this->nome;
+    }
+
+    /**
+     * Define o Nome Fantasia
+     *
+     * @param string $nomeFantasia
+     *
+     * @return Pessoa
+     */
+    public function setNomeFantasia($nomeFantasia)
+    {
+        $this->nomeFantasia = $nomeFantasia;
+
+        return $this;
+    }
+
+    /**
+     * Retorna o Nome Fantasia
+     *
+     * @return string
+     */
+    public function getNomeFantasia()
+    {
+        return $this->nomeFantasia;
     }
 
     /**

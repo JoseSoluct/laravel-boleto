@@ -266,32 +266,10 @@ class CalculoDV
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | 237 - Bradesco
-    |--------------------------------------------------------------------------
-    */
-    public static function bradescoAgencia($agencia)
-    {
-        $dv = Util::modulo11($agencia, 2, 9, 0, 'P');
-
-        return $dv == 11 ? 0 : $dv;
-    }
-
-    public static function bradescoContaCorrente($conta)
-    {
-        return Util::modulo11($conta, 2, 9, 0, 'P');
-    }
-
-    public static function bradescoNossoNumero($carteira, $nossoNumero)
-    {
-        return Util::modulo11($carteira . Util::numberFormatGeral($nossoNumero, 11), 2, 7, 0, 'P');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | 224 - Fibra
-    |--------------------------------------------------------------------------
-    */
+ |--------------------------------------------------------------------------
+ | 224 - Fibra
+ |--------------------------------------------------------------------------
+ */
     public static function fibraAgencia($agencia)
     {
         return Util::modulo11($agencia);
@@ -324,6 +302,61 @@ class CalculoDV
         }
 
         return 10 - $sum % 10;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 237 - Bradesco
+    |--------------------------------------------------------------------------
+    */
+    public static function bradescoAgencia($agencia)
+    {
+        $dv = Util::modulo11($agencia, 2, 9, 0, 'P');
+
+        return $dv == 11 ? 0 : $dv;
+    }
+
+    public static function bradescoContaCorrente($conta)
+    {
+        return Util::modulo11($conta, 2, 9, 0, 'P');
+    }
+
+    public static function bradescoNossoNumero($carteira, $nossoNumero)
+    {
+        return Util::modulo11($carteira . Util::numberFormatGeral($nossoNumero, 11), 2, 7, 0, 'P');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 246 - ABC
+    |--------------------------------------------------------------------------
+    */
+
+    public static function abcNossoNumero($agencia, $carteira, $nossoNumero)
+    {
+        $numero = Util::numberFormatGeral($agencia, 4) . Util::numberFormatGeral($carteira, 3) . Util::numberFormatGeral($nossoNumero, 10);
+        $factors = [2, 1];
+        $sum = 0;
+
+        for ($i = strlen($numero) - 1, $j = 0; $i >= 0; $i--, $j++) {
+            $result = intval($numero[$i]) * $factors[$j % 2];
+            $sum += ($result > 9) ? ($result - 9) : $result;
+        }
+
+        $mod = $sum % 10;
+
+        return ($mod == 0) ? 0 : 10 - $mod;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 274 - Grafeno
+    |--------------------------------------------------------------------------
+    */
+
+    public static function grafenoNossoNumero($carteira, $nossoNumero)
+    {
+        return Util::modulo11(Util::numberFormatGeral($carteira, 2) . Util::numberFormatGeral($nossoNumero, 11), 2, 7, 0, 'P');
     }
 
     /*
@@ -454,6 +487,28 @@ class CalculoDV
         }
 
         return 10 - $sum % 10;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 707 - Daycoval
+    |--------------------------------------------------------------------------
+    */
+
+    public static function daycovalNossoNumero($agencia, $carteira, $nossoNumero)
+    {
+        $numero = Util::numberFormatGeral($agencia, 4) . Util::numberFormatGeral($carteira, 3) . Util::numberFormatGeral($nossoNumero, 10);
+        $factors = [2, 1];
+        $sum = 0;
+
+        for ($i = strlen($numero) - 1, $j = 0; $i >= 0; $i--, $j++) {
+            $result = intval($numero[$i]) * $factors[$j % 2];
+            $sum += ($result > 9) ? ($result - 9) : $result;
+        }
+
+        $mod = $sum % 10;
+
+        return ($mod == 0) ? 0 : 10 - $mod;
     }
 
     /*

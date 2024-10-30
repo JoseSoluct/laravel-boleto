@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Eduardokum\LaravelBoleto\Util;
 use Illuminate\Support\Collection;
+use Eduardokum\LaravelBoleto\Pessoa;
 use Eduardokum\LaravelBoleto\Exception\ValidationException;
 use Eduardokum\LaravelBoleto\Contracts\Pessoa as PessoaContract;
 use Eduardokum\LaravelBoleto\Contracts\Boleto\Boleto as BoletoContract;
@@ -19,6 +20,8 @@ abstract class AbstractRemessa
     const TRAILER = 'trailer';
 
     protected $tamanho_linha = false;
+
+    protected $tamanhos_linha = [];
 
     /**
      * Campos necessários para a remessa
@@ -68,6 +71,13 @@ abstract class AbstractRemessa
      * @var
      */
     protected $atual;
+
+    /**
+     * Variável com ponteiro para o tamanho da linha que esta sendo editada.
+     *
+     * @var
+     */
+    protected $tamanho_atual;
 
     /**
      * Caractere de fim de linha
@@ -269,6 +279,7 @@ abstract class AbstractRemessa
     public function setBeneficiario($beneficiario)
     {
         Util::addPessoa($this->beneficiario, $beneficiario);
+        $this->beneficiario->setTipo(Pessoa::TIPO_BENEFICIARIO);
 
         return $this;
     }
@@ -427,7 +438,7 @@ abstract class AbstractRemessa
     public function isValid(&$messages)
     {
         foreach ($this->camposObrigatorios as $campo) {
-            $test = call_user_func([$this, 'get' . Str::camel($campo)]);
+            $test = call_user_func([$this, 'get' . ucfirst(Str::camel($campo))]);
             if ($test === '' || is_null($test)) {
                 $messages .= "Campo $campo está em branco";
 
@@ -489,7 +500,7 @@ abstract class AbstractRemessa
      */
     protected function add($i, $f, $value)
     {
-        return Util::adiciona($this->atual, $i, $f, $value);
+        return Util::adiciona($this->atual, $i, $f, $value, $this->tamanho_atual);
     }
 
     /**
@@ -538,7 +549,7 @@ abstract class AbstractRemessa
         }
 
         $a = array_filter($a, 'mb_strlen');
-        if (count($a) != $this->tamanho_linha + $extendido) {
+        if (count($a) != ($this->tamanho_linha + $extendido)) {
             throw new ValidationException(sprintf('$a não possui %s posições, possui: %s', $this->tamanho_linha, count($a)));
         }
 
