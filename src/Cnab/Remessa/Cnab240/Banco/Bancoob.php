@@ -153,6 +153,21 @@ class Bancoob extends AbstractRemessa implements RemessaContract
         $this->add(221, 221, self::PROTESTO_NAO_PROTESTAR);
         if ($boleto->getDiasProtesto() > 0) {
             $this->add(221, 221, self::PROTESTO_DIAS_UTEIS);
+            switch ($boleto->getTipoProtesto()) {
+                case 1:
+                    $this->add(221, 221, self::PROTESTO_DIAS_CORRIDOS);
+                    break;
+                case 2:
+                default:
+                    $this->add(221, 221, self::PROTESTO_DIAS_UTEIS);
+                    break;
+                case 7:
+                    $this->add(221, 221, self::PROTESTO_NEGATIVAR_DIAS_CORRIDOS);
+                    break;
+                case 8:
+                    $this->add(221, 221, self::PROTESTO_NAO_NEGATIVAR);
+                    break;
+            }
         }
         $this->add(222, 223, Util::formatCnab('9', $boleto->getDiasProtesto(), 2));
         $this->add(224, 224, '0');
