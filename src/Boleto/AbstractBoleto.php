@@ -592,7 +592,7 @@ abstract class AbstractBoleto implements BoletoContract
     public function setCarteira($carteira)
     {
         if ($this->getCarteiras() !== false && ! in_array($carteira, $this->getCarteiras())) {
-            throw new ValidationException('Carteira não disponível!');
+            throw new ValidationException('Carteira `' . $$carteira . '` não disponível! Carteiras válidas: ' . implode(', ', $this->getCarteiras()));
         }
         $this->carteira = $carteira;
 
@@ -1548,7 +1548,7 @@ abstract class AbstractBoleto implements BoletoContract
      */
     public function setDiasBaixaAutomatica($baixaAutomatica)
     {
-        $exception = sprintf('O banco %s não suporta baixa automática, pode usar também', basename(get_class($this)));
+        $exception = sprintf('O banco %s não suporta baixa automática', substr(strrchr(get_class($this), '\\'), 1));
         throw new ValidationException($exception);
     }
 

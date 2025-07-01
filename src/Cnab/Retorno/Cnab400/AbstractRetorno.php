@@ -71,6 +71,9 @@ abstract class AbstractRetorno extends AbstractRetornoGeneric
             return $this;
         }
 
+        $detalhes = false;
+        $trailer = false;
+
         if (method_exists($this, 'init')) {
             call_user_func([$this, 'init']);
         }
@@ -81,8 +84,10 @@ abstract class AbstractRetorno extends AbstractRetornoGeneric
             if ($inicio == '0') {
                 $this->processarHeader($linha);
             } elseif ($inicio == '9') {
+                $trailer = true;
                 $this->processarTrailer($linha);
             } else {
+                $detalhes = true;
                 $this->incrementDetalhe();
                 if ($this->processarDetalhe($linha) === false) {
                     unset($this->detalhe[$this->increment]);
@@ -90,6 +95,15 @@ abstract class AbstractRetorno extends AbstractRetornoGeneric
                 }
             }
         }
+
+        if (! $detalhes) {
+            throw new ValidationException('Nenhum registro do tipo detalhe encontrado no arquivo');
+        }
+
+        if (! $trailer) {
+            $this->processarTrailer(array_fill(0, 400, '0'));
+        }
+
         if (method_exists($this, 'finalize')) {
             call_user_func([$this, 'finalize']);
         }

@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Support\Collection;
 use Eduardokum\LaravelBoleto\Tests\TestCase;
 use Eduardokum\LaravelBoleto\Cnab\Retorno\Cnab400\Detalhe;
+use Eduardokum\LaravelBoleto\Exception\ValidationException;
 use Eduardokum\LaravelBoleto\Cnab\Retorno\Cnab400\Banco\Bradesco;
 
 class RetornoCnab400Test extends TestCase
@@ -374,6 +375,27 @@ class RetornoCnab400Test extends TestCase
         }
     }
 
+    public function testRetornoBvCnab400()
+    {
+        $retorno = \Eduardokum\LaravelBoleto\Cnab\Retorno\Factory::make(__DIR__ . '/files/cnab400/bv.ret');
+        $retorno->processar();
+
+        $this->assertNotNull($retorno->getHeader());
+        $this->assertNotNull($retorno->getDetalhes());
+        $this->assertNotNull($retorno->getTrailer());
+
+        $this->assertEquals('Banco Votorantim S.A.', $retorno->getBancoNome());
+        $this->assertEquals('655', $retorno->getCodigoBanco());
+
+        $this->assertInstanceOf(Collection::class, $retorno->getDetalhes());
+        $this->assertInstanceOf(Detalhe::class, $retorno->getDetalhe(1));
+
+        foreach ($retorno->getDetalhes() as $detalhe) {
+            $this->assertInstanceOf(Detalhe::class, $detalhe);
+            $this->assertArrayHasKey('numeroDocumento', $detalhe->toArray());
+        }
+    }
+
     public function testRetornoOurinvestCnab400()
     {
         $retorno = \Eduardokum\LaravelBoleto\Cnab\Retorno\Factory::make(__DIR__ . '/files/cnab400/ourinvest.ret');
@@ -424,5 +446,12 @@ class RetornoCnab400Test extends TestCase
         $this->assertNull($retorno->current()->getId());
         $this->assertNull($retorno->current()->getPixChave());
         $this->assertNull($retorno->current()->getPixChaveTipo());
+    }
+
+    public function testRetornoSemDetalheCnab400()
+    {
+        $this->expectException(ValidationException::class);
+        $retorno = \Eduardokum\LaravelBoleto\Cnab\Retorno\Factory::make(__DIR__ . '/files/cnab400/retorno_sem_detalhe.ret');
+        $retorno->processar();
     }
 }

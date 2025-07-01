@@ -391,7 +391,7 @@ abstract class AbstractRemessa
     public function setCarteira($carteira)
     {
         if ($this->getCarteiras() !== false && ! in_array($carteira, $this->getCarteiras())) {
-            throw new ValidationException('Carteira não disponível!');
+            throw new ValidationException('Carteira `' . $$carteira . '` não disponível! Carteiras válidas: ' . implode(', ', $this->getCarteiras()));
         }
         $this->carteira = $carteira;
 

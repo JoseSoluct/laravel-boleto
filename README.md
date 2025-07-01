@@ -1,4 +1,4 @@
-[![Packagist](https://img.shields.io/packagist/v/eduardokum/laravel-boleto.svg?style=flat-square)](https://github.com/eduardokum/laravel-boleto)
+ [![Packagist](https://img.shields.io/packagist/v/eduardokum/laravel-boleto.svg?style=flat-square)](https://github.com/eduardokum/laravel-boleto)
 [![Packagist](https://img.shields.io/packagist/dt/eduardokum/laravel-boleto.svg?style=flat-square)](https://github.com/eduardokum/laravel-boleto)
 [![Packagist](https://img.shields.io/packagist/l/eduardokum/laravel-boleto.svg?style=flat-square)](https://github.com/eduardokum/laravel-boleto)
 [![build](https://github.com/eduardokum/laravel-boleto/actions/workflows/build.yml/badge.svg)](https://github.com/eduardokum/laravel-boleto/actions/workflows/build.yml)
@@ -41,4 +41,4 @@ Mas também, caso você ache que qualquer informação obtida aqui, lhe foi úti
 * Alberto Yorimasa Kaneto
 * Luciano Martins
 * CAJU (ARAUJO & PRADO) 
-* FABRICIO KICXERT
+* FABRÍCIO WICKERT

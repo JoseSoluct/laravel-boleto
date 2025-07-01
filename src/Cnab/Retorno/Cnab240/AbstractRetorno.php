@@ -120,6 +120,9 @@ abstract class AbstractRetorno extends AbstractRetornoGeneric
             call_user_func([$this, 'init']);
         }
 
+        $detalhes = false;
+        $trailer = false;
+
         foreach ($this->file as $linha) {
             $recordType = $this->rem(8, 8, $linha);
 
@@ -132,6 +135,7 @@ abstract class AbstractRetorno extends AbstractRetornoGeneric
                     $this->incrementDetalhe();
                 }
 
+                $detalhes = true;
                 if ($this->processarDetalhe($linha) === false) {
                     unset($this->detalhe[$this->increment]);
                     $this->increment--;
@@ -139,8 +143,17 @@ abstract class AbstractRetorno extends AbstractRetornoGeneric
             } elseif ($recordType == '5') {
                 $this->processarTrailerLote($linha);
             } elseif ($recordType == '9') {
+                $trailer = true;
                 $this->processarTrailer($linha);
             }
+        }
+
+        if (! $detalhes) {
+            throw new ValidationException('Nenhum registro do tipo detalhe encontrado no arquivo');
+        }
+
+        if (! $trailer) {
+            $this->processarTrailer(array_fill(0, 240, '0'));
         }
 
         if (method_exists($this, 'finalize')) {

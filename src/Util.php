@@ -556,6 +556,9 @@ final class Util
      */
     public static function fatorVencimentoBack($factor, $format = 'Y-m-d')
     {
+        if ($factor <= 4000) {
+            $factor = $factor + 9000;
+        }
         $date = Carbon::create(1997, 10, 7, 0, 0, 0)->addDays((int) $factor);
 
         return $format ? $date->format($format) : $date;
@@ -1078,6 +1081,7 @@ final class Util
             BoletoContract::COD_BANCO_DELCRED   => 'Banco\\Delbank',
             BoletoContract::COD_BANCO_PINE      => 'Banco\\Pine',
             BoletoContract::COD_BANCO_OURINVEST => 'Banco\\Ourinvest',
+            BoletoContract::COD_BANCO_BV        => 'Banco\\Bv',
             BoletoContract::COD_BANCO_SICREDI   => 'Banco\\Sicredi',
             BoletoContract::COD_BANCO_BANCOOB   => 'Banco\\Bancoob',
             BoletoContract::COD_BANCO_CRESOL    => 'Banco\\Cresol',
