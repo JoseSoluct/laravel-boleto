@@ -15,8 +15,8 @@ class Sicredi extends AbstractAPI
 {
     protected $baseUrl = 'https://api-parceiro.sicredi.com.br/';
 
-    /** 
-     * @var int $version
+    /**
+     * @var int
      **/
     private $version = 3.8;
 
@@ -54,7 +54,7 @@ class Sicredi extends AbstractAPI
         'apiKey',
     ];
 
-    public function __construct($params=[])
+    public function __construct($params = [])
     {
 
         if (isset($params['ambiente']) && $params['ambiente'] == 'H') {
@@ -126,7 +126,7 @@ class Sicredi extends AbstractAPI
 
     /**
      * @return Sicredi
-     * 
+     *
      * @throws CurlException
      * @throws HttpException
      * @throws UnauthorizedException
@@ -138,12 +138,12 @@ class Sicredi extends AbstractAPI
         }
 
         $grant = $this->post($this->url('auth'),
-            $post=[
-                'nomeUsuario'     => $this->getUsuario(),
-                'senha'           => $this->getSenha(),
+            $post = [
+                'nomeUsuario' => $this->getUsuario(),
+                'senha'       => $this->getSenha(),
             ],
-            $raw=false,
-            $clear=false
+            $raw = false,
+            $clear = false
         )->body;
 
         return $this->setAccessToken('Bearer ' . $grant->accessToken);
@@ -157,8 +157,8 @@ class Sicredi extends AbstractAPI
         if ($this->version == 3.8) {
             return array_filter([
                 'Authorization' => $this->getAccessToken(),
-                'Cooperativa' => $this->getCooperativa(),
-                'apiKey' => $this->getApiKey()
+                'Cooperativa'   => $this->getCooperativa(),
+                'apiKey'        => $this->getApiKey(),
             ]);
         }
 
@@ -204,11 +204,11 @@ class Sicredi extends AbstractAPI
      * @return mixed
      * @throws ValidationException
      */
-    public function retrieveList($inputedParams=[])
+    public function retrieveList($inputedParams = [])
     {
         throw new ValidationException('Método não disponível no banco');
     }
-    
+
     /**
      * @param $nossoNumero
      *
@@ -222,7 +222,7 @@ class Sicredi extends AbstractAPI
 
     /**
      * @param string $id
-     * 
+     *
      * @return mixed
      * @throws CurlException
      * @throws HttpException
@@ -274,7 +274,7 @@ class Sicredi extends AbstractAPI
     {
         throw new ValidationException('Método não disponível no banco');
     }
-    
+
     /**
      * @param $id
      *
@@ -318,11 +318,25 @@ class Sicredi extends AbstractAPI
 
         $aUrls = [
             3.8 => [
-                'create'  => "cobranca/v2/beneficiarios/{$codigoBeneficiario}/titulos",
-                'show'    => "cobranca/v2/beneficiarios/{$codigoBeneficiario}/titulos/{$param}/status",
-                'pdf'     => "cobranca/v2/beneficiarios/{$codigoBeneficiario}/titulos/{$param}",
-                'auth'    => 'auth/openapi/token',
-            ]
+                'create'                           => 'cobranca/boleto/v1/boletos',
+                'baixa'                            => "cobranca/boleto/v1/boletos/{$param}/baixa",
+                'data-vencimento'                  => "cobranca/boleto/v1/boletos/{$param}/data-vencimento",
+                'juros'                            => "cobranca/boleto/v1/boletos/{$param}/juros",
+                'seu-numero'                       => "cobranca/boleto/v1/boletos/{$param}/seu-numero",
+                'desconto'                         => "cobranca/boleto/v1/boletos/{$param}/desconto",
+                'protesto'                         => "cobranca/boleto/v1/boletos/{$param}/protesto",
+                'sustar-protesto-baixar-titulo'    => "cobranca/boleto/v1/boletos/{$param}/sustar-protesto-baixar-titulo",
+                'sustar-protesto-manter-titulo'    => "cobranca/boleto/v1/boletos/{$param}/sustar-protesto-manter-titulo",
+                'cancelar-protesto-automatico'     => "cobranca/boleto/v1/boletos/{$param}/cancelar-protesto-automatico",
+                'conceder-abatimento'              => "cobranca/boleto/v1/boletos/{$param}/conceder-abatimento",
+                'cancelar-abatimento'              => "cobranca/boleto/v1/boletos/{$param}/cancelar-abatimento",
+                'negativacao'                      => "cobranca/boleto/v1/boletos/{$param}/negativacao",
+                'sustar-negativacao-baixar-titulo' => "cobranca/boleto/v1/boletos/{$param}/sustar-negativacao-baixar-titulo",
+                'pdf'                              => "cobranca/boleto/v1/boletos/pdf?linhaDigitavel={$param}",
+                'consulta-nn'                      => "cobranca/boleto/v1/boletos?codigoBeneficiario={$param['codigoBeneficiario']}&nossoNumero={$param['nossoNumero']}",
+                'liquidados'                       => "cobranca/boleto/v1/boletos/liquidados/dia?codigoBeneficiario={$param['codigoBeneficiario']}&dia={$param['dia']}",
+                'auth'                             => 'auth/openapi/token',
+            ],
         ];
 
         return Arr::get($aUrls, "{$this->version}.{$type}");
