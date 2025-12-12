@@ -347,4 +347,8 @@ interface Boleto
      * @return bool
      */
     public function imprimeBoleto();
+
+    /**
+     */
+    public function getTipoimpressao();
 }
