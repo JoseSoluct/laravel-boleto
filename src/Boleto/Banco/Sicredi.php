@@ -227,8 +227,6 @@ class Sicredi extends AbstractBoleto implements BoletoAPIContract
         $this->tipoimpressao = $tipoimpressao;
     }
 
-
-
     /**
      * Retorna o campo Agência/Beneficiário do boleto
      *
