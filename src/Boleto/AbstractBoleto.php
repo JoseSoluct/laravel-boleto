@@ -1547,7 +1547,7 @@ abstract class AbstractBoleto implements BoletoContract
      *
      * @return int
      */
-    public function getTipoImpressao()
+    public function getTipoimpressao()
     {
         return $this->tipoimpressao;
     }
