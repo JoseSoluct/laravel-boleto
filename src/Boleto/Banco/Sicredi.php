@@ -89,7 +89,7 @@ class Sicredi extends AbstractBoleto implements BoletoAPIContract
      *
      * @var bool
      */
-    protected $tipoImpressao;
+    protected $tipoimpressao;
 
     /**
      * Código do posto do cliente no banco.
@@ -216,15 +216,15 @@ class Sicredi extends AbstractBoleto implements BoletoAPIContract
      */
     public function isTipoimpressao()
     {
-        return $this->tipoImpressao;
+        return $this->tipoimpressao;
     }
 
     /**
-     * @param bool $tipoImpressao
+     * @param bool $tipoimpressao
      */
-    public function setTipoimpressao($tipoImpressao)
+    public function setTipoimpressao($tipoimpressao)
     {
-        $this->tipoImpressao = $tipoImpressao;
+        $this->tipoimpressao = $tipoimpressao;
     }
 
 
