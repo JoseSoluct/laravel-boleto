@@ -72,6 +72,13 @@ abstract class AbstractBoleto implements BoletoContract
     protected $codigoBanco;
 
     /**
+     * Código do banco
+     *
+     * @var string
+     */
+    protected $tipoimpressao;
+
+    /**
      * Moeda
      *
      * @var int
