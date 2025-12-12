@@ -1541,6 +1541,18 @@ abstract class AbstractBoleto implements BoletoContract
     }
 
     /**
+     * Retorna o tipo de impressão do boleto
+     *
+     * @param int $default
+     *
+     * @return int
+     */
+    public function getTipoImpressao()
+    {
+        return $this->tipoImpressao;
+    }
+
+    /**
      * Seta os dias para baixa automática
      *
      * @param int $baixaAutomatica

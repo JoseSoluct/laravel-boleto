@@ -159,8 +159,10 @@ class Sicredi extends AbstractRemessa implements RemessaContract
         $this->add(1, 1, '1');
         $this->add(2, 2, 'A');
         $this->add(3, 3, $this->getCarteiraNumero());
-        $this->add(4, 4, 'A');
-        $this->add(5, 16, '');
+        $this->add(4, 4, $boleto->getTipoImpressao());
+        $this->add(5, 5, '');
+        $this->add(6, 6, '');
+        $this->add(7, 16, '');
         $this->add(17, 17, 'A');
         $this->add(18, 18, 'A');
         $this->add(19, 19, 'A');

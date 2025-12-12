@@ -2,18 +2,20 @@
 
 namespace Eduardokum\LaravelBoleto\Boleto\Banco;
 
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Eduardokum\LaravelBoleto\Util;
 use Eduardokum\LaravelBoleto\CalculoDV;
 use Eduardokum\LaravelBoleto\Boleto\AbstractBoleto;
 use Eduardokum\LaravelBoleto\Exception\ValidationException;
-use Eduardokum\LaravelBoleto\Contracts\Boleto\Boleto as BoletoContract;
+use Eduardokum\LaravelBoleto\Contracts\Boleto\BoletoAPI as BoletoAPIContract;
 
-class Sicredi extends AbstractBoleto implements BoletoContract
+class Sicredi extends AbstractBoleto implements BoletoAPIContract
 {
     public function __construct(array $params = [])
     {
         parent::__construct($params);
-        $this->addCampoObrigatorio('byte', 'posto');
+        $this->addCampoObrigatorio('byte', 'posto', 'tipoimpressao');
     }
 
     /**
@@ -81,6 +83,13 @@ class Sicredi extends AbstractBoleto implements BoletoContract
      * @var bool
      */
     protected $registro = true;
+
+    /**
+     * Tipo de impressao do Boleto. A - Normal, B - Carne
+     *
+     * @var bool
+     */
+    protected $tipoImpressao;
 
     /**
      * Código do posto do cliente no banco.
@@ -203,6 +212,24 @@ class Sicredi extends AbstractBoleto implements BoletoContract
     }
 
     /**
+     * @return bool
+     */
+    public function isTipoimpressao()
+    {
+        return $this->tipoImpressao;
+    }
+
+    /**
+     * @param bool $tipoImpressao
+     */
+    public function setTipoimpressao($tipoImpressao)
+    {
+        $this->tipoImpressao = $tipoImpressao;
+    }
+
+
+
+    /**
      * Retorna o campo Agência/Beneficiário do boleto
      *
      * @return string
@@ -292,5 +319,152 @@ class Sicredi extends AbstractBoleto implements BoletoContract
             'agencia'         => substr($campoLivre, 11, 4),
             //'contaCorrente' => substr($campoLivre, 17, 5),
         ];
+    }
+
+    /**
+     * Tipo de cobrança para API
+     *
+     * @var string
+     */
+    protected $tipoCobranca = 'HIBRIDO';
+
+    /**
+     * Espécie do documento, código para API
+     *
+     * @var array
+     */
+    protected $especiesCodigoAPI = [
+        'DMI' => 'DUPLICATA_MERCANTIL_INDICACAO',
+        'DM'  => 'DUPLICATA_MERCANTIL_INDICACAO',
+        'DR'  => 'DUPLICATA_RURAL',
+        'NP'  => 'NOTA_PROMISSORIA',
+        'NR'  => 'NOTA_PROMISSORIA_RURAL',
+        'NS'  => 'NOTA_SEGUROS',
+        'RC'  => 'RECIBO',
+        'LC'  => 'LETRA_CAMBIO',
+        'ND'  => 'NOTA_DEBITO',
+        'DSI' => 'DUPLICATA_SERVICO_INDICACAO',
+        'OS'  => 'OUTROS',
+        'BP'  => 'BOLETO_PROPOSTA',
+        'CC'  => 'CARTAO_CREDITO',
+        'BD'  => 'BOLETO_DEPOSITO',
+    ];
+
+    /**
+     * Define o tipo de cobrança
+     *
+     * @param string $tipoCobranca
+     * @return Sicredi
+     */
+    public function setTipoCobranca($tipoCobranca)
+    {
+        $this->tipoCobranca = $tipoCobranca;
+
+        return $this;
+    }
+
+    /**
+     * Retorna o tipo de cobrança
+     *
+     * @return string
+     */
+    public function getTipoCobranca()
+    {
+        return $this->tipoCobranca;
+    }
+
+    /**
+     * Return Boleto Array for API.
+     *
+     * @return array
+     */
+    public function toAPI()
+    {
+        $especieDocumento = Arr::get($this->especiesCodigoAPI, $this->getEspecieDoc(), 'OUTROS');
+
+        $pagador = [
+            'tipoPessoa' => strlen(Util::onlyNumbers($this->getPagador()->getDocumento())) == 14 ? 'PESSOA_JURIDICA' : 'PESSOA_FISICA',
+            'documento'  => Util::onlyNumbers($this->getPagador()->getDocumento()),
+            'nome'       => $this->getPagador()->getNome(),
+            'endereco'   => $this->getPagador()->getEndereco(),
+            'cidade'     => $this->getPagador()->getCidade(),
+            'uf'         => $this->getPagador()->getUf(),
+            'cep'        => Util::onlyNumbers($this->getPagador()->getCep()),
+        ];
+
+        $beneficiarioFinal = null;
+        if ($this->getSacadorAvalista()) {
+            $beneficiarioFinal = [
+                'tipoPessoa'     => strlen(Util::onlyNumbers($this->getSacadorAvalista()->getDocumento())) == 14 ? 'PESSOA_JURIDICA' : 'PESSOA_FISICA',
+                'documento'      => Util::onlyNumbers($this->getSacadorAvalista()->getDocumento()),
+                'nome'           => $this->getSacadorAvalista()->getNome(),
+                'logradouro'     => $this->getSacadorAvalista()->getEndereco(),
+                'cidade'         => $this->getSacadorAvalista()->getCidade(),
+                'uf'             => $this->getSacadorAvalista()->getUf(),
+                'cep'            => (int) Util::onlyNumbers($this->getSacadorAvalista()->getCep()),
+            ];
+        }
+
+        $informativos = array_values(array_filter($this->getDescricaoDemonstrativo()));
+        $mensagens = array_values(array_filter($this->getInstrucoes()));
+
+        return array_filter([
+            'codigoBeneficiario' => $this->getCodigoCliente(),
+            'seuNumero'          => $this->getNumero(),
+            'valor'              => Util::nFloat($this->getValor(), 2, false),
+            'dataVencimento'     => $this->getDataVencimento()->format('Y-m-d'),
+            'especieDocumento'   => $especieDocumento,
+            'tipoCobranca'       => $this->getTipoCobranca(),
+            'pagador'            => $pagador,
+            'beneficiarioFinal'  => $beneficiarioFinal,
+            'informativos'       => ! empty($informativos) ? $informativos : null,
+            'mensagens'          => ! empty($mensagens) ? $mensagens : null,
+        ]);
+    }
+
+    /**
+     * @param $boleto
+     * @param $appends
+     *
+     * @return Sicredi
+     * @throws ValidationException
+     */
+    public static function fromAPI($boleto, $appends)
+    {
+        if (! array_key_exists('beneficiario', $appends)) {
+            throw new ValidationException('Informe o beneficiario');
+        }
+        if (! array_key_exists('conta', $appends)) {
+            throw new ValidationException('Informe a conta');
+        }
+
+        $aSituacao = [
+            'LIQUIDADO'   => AbstractBoleto::SITUACAO_PAGO,
+            'BAIXADO'     => AbstractBoleto::SITUACAO_BAIXADO,
+            'EM_ABERTO'   => AbstractBoleto::SITUACAO_ABERTO,
+            'VENCIDO'     => AbstractBoleto::SITUACAO_ABERTO,
+            'PROTESTADO'  => AbstractBoleto::SITUACAO_PROTESTADO,
+        ];
+
+        $boleto = Arr::dot($boleto);
+
+        return new self(array_merge(array_filter([
+            'situacao'        => Arr::get($aSituacao, Arr::get($boleto, 'situacao'), Arr::get($boleto, 'situacao')),
+            'nossoNumero'     => Arr::get($boleto, 'nossoNumero'),
+            'valor'           => Arr::get($boleto, 'valor'),
+            'numero'          => Arr::get($boleto, 'seuNumero'),
+            'numeroDocumento' => Arr::get($boleto, 'seuNumero'),
+            'dataVencimento'  => Arr::get($boleto, 'dataVencimento')
+                ? Carbon::createFromFormat('Y-m-d', Arr::get($boleto, 'dataVencimento'))
+                : null,
+            'pagador' => array_filter([
+                'nome'      => Arr::get($boleto, 'pagador.nome'),
+                'documento' => Arr::get($boleto, 'pagador.documento'),
+                'endereco'  => Arr::get($boleto, 'pagador.endereco'),
+                'cidade'    => Arr::get($boleto, 'pagador.cidade'),
+                'uf'        => Arr::get($boleto, 'pagador.uf'),
+                'cep'       => Arr::get($boleto, 'pagador.cep'),
+            ]),
+        ]), $appends));
     }
 }

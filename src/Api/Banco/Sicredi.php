@@ -58,7 +58,7 @@ class Sicredi extends AbstractAPI
     {
 
         if (isset($params['ambiente']) && $params['ambiente'] == 'H') {
-            $this->baseUrl = 'https://api.e-unicred.com.br/sb/';
+            $this->baseUrl = 'https://api-parceiro.sicredi.com.br/sb/';
         }
 
         parent::__construct($params);
@@ -145,7 +145,6 @@ class Sicredi extends AbstractAPI
             $raw = false,
             $clear = false
         )->body;
-
         return $this->setAccessToken('Bearer ' . $grant->accessToken);
     }
 
@@ -333,8 +332,7 @@ class Sicredi extends AbstractAPI
                 'negativacao'                      => "cobranca/boleto/v1/boletos/{$param}/negativacao",
                 'sustar-negativacao-baixar-titulo' => "cobranca/boleto/v1/boletos/{$param}/sustar-negativacao-baixar-titulo",
                 'pdf'                              => "cobranca/boleto/v1/boletos/pdf?linhaDigitavel={$param}",
-                'consulta-nn'                      => "cobranca/boleto/v1/boletos?codigoBeneficiario={$param['codigoBeneficiario']}&nossoNumero={$param['nossoNumero']}",
-                'liquidados'                       => "cobranca/boleto/v1/boletos/liquidados/dia?codigoBeneficiario={$param['codigoBeneficiario']}&dia={$param['dia']}",
+                'show'                             => "cobranca/boleto/v1/boletos/{$param}",
                 'auth'                             => 'auth/openapi/token',
             ],
         ];
